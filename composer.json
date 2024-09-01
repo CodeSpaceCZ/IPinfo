@@ -1,0 +1,14 @@
+{
+	"name": "codespace/whois-parser",
+	"type": "library",
+	"license": "MIT",
+	"autoload": {
+		"psr-4": {
+			"CodeSpace\\WhoisParser\\": "src/",
+			"CodeSpace\\WhoisParser\\Provider\\": "src/provider/"
+		}
+	},
+	"require": {
+		"mallardduck/whois-client": "^3.0"
+	}
+}
