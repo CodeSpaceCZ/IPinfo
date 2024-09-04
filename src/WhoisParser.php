@@ -1,19 +1,30 @@
 <?php namespace CodeSpace\WhoisParser;
 
+use CodeSpace\WhoisParser\Provider\ApNicProvider;
+use CodeSpace\WhoisParser\Provider\RipeProvider;
+
 class WhoisParser {
 
 	public array $lines = [];
-	public string $provider;
+	public ?Provider $provider;
 
-	public static function fromArray(array $lines, string $provider) {
+	public static function fromArray(array $lines, ?Provider $provider = null) {
 		$parser = new self();
 		$parser->lines = $lines;
 		$parser->provider = $provider;
 		return $parser;
 	}
 
-	public static function fromString(string $whois, string $provider) {
+	public static function fromString(string $whois, ?Provider $provider = null) {
 		return self::fromArray(explode("\n", $whois), $provider);
+	}
+
+	public function getProvider(): ?ProviderInterface {
+		if (!$this->provider) return null;
+		return match ($this->provider) {
+			Provider::RIPE => new RipeProvider($this),
+			Provider::APNIC => new ApNicProvider($this)
+		};
 	}
 
 	private function getOffset(array $arr, int $index): mixed {

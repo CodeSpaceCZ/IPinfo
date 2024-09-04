@@ -5,7 +5,7 @@
 	"autoload": {
 		"psr-4": {
 			"CodeSpace\\WhoisParser\\": "src/",
-			"CodeSpace\\WhoisParser\\Parser\\": "src/parser/"
+			"CodeSpace\\WhoisParser\\Provider\\": "src/provider/"
 		}
 	},
 	"require": {

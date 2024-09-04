@@ -1,12 +1,19 @@
-<?php namespace CodeSpace\WhoisParser\Parser;
+<?php namespace CodeSpace\WhoisParser\Provider;
 
-use CodeSpace\WhoisParser\ParserInterface;
+use CodeSpace\WhoisParser\ProviderInterface;
 use CodeSpace\WhoisParser\WhoisParser;
 
-class RipeParser implements ParserInterface {
+class RipeProvider implements ProviderInterface {
 
-	public function parseAsn(WhoisParser $whois): ?array {
-		$as = $whois->getSectionWithKey("aut-num");
+	private $whois;
+
+	public function __construct(WhoisParser $whois) {
+		$this->whois = $whois;
+	}
+
+	public function parseAsn(): ?array {
+		$as = $this->whois->getSectionWithKey("aut-num");
+		if (!$as) return null;
 		return [
 			"asn" => $as->getKeyValue("aut-num"),
 			"name" => $as->getKeyValue("as-name"),
@@ -14,8 +21,9 @@ class RipeParser implements ParserInterface {
 		];
 	}
 
-	public function parseAbuse(WhoisParser $whois): ?array {
-		$abuse = $whois->getSectionWithKey("abuse-mailbox");
+	public function parseAbuse(): ?array {
+		$abuse = $this->whois->getSectionWithKey("abuse-mailbox");
+		if (!$abuse) return null;
 		return [
 			"role" => $abuse->getKeyValue("role"),
 			"address" => $abuse->getKeyValues("address"),
@@ -25,8 +33,9 @@ class RipeParser implements ParserInterface {
 		];
 	}
 
-	public function parseOrg(WhoisParser $whois): ?array {
-		$org = $whois->getSectionWithKey("organisation");
+	public function parseOrg(): ?array {
+		$org = $this->whois->getSectionWithKey("organisation");
+		if (!$org) return null;
 		return [
 			"id" => $org->getKeyValue("organisation"),
 			"name" => $org->getKeyValue("org-name"),
@@ -37,8 +46,9 @@ class RipeParser implements ParserInterface {
 		];
 	}
 
-	public function parseRoute(WhoisParser $whois): ?array {
-		$section = $whois->getSectionWithKeys(["route", "route6"]);
+	public function parseRoute(): ?array {
+		$section = $this->whois->getSectionWithKeys(["route", "route6"]);
+		if (!$section) return null;
 		$range = $section->getKeysValue(["route", "route6"]);
 		return [
 			"range" => $range,
@@ -47,8 +57,9 @@ class RipeParser implements ParserInterface {
 		];
 	}
 
-	public function parseInet(WhoisParser $whois): ?array {
-		$section = $whois->getSectionWithKeys(["inetnum", "inet6num"]);
+	public function parseInet(): ?array {
+		$section = $this->whois->getSectionWithKeys(["inetnum", "inet6num"]);
+		if (!$section) return null;
 		$range = $section->getKeysValue(["inetnum", "inet6num"]);
 		return [
 			"range" => $range,
@@ -58,12 +69,12 @@ class RipeParser implements ParserInterface {
 		];
 	}
 
-	public function findAsn(WhoisParser $whois): ?string {
-		return $whois->getKeyValue("origin");
+	public function findAsn(): ?string {
+		return $this->whois->getKeyValue("origin");
 	}
 
-	public function findAbuseContact(WhoisParser $whois): ?string {
-		return $whois->getKeyValue("abuse-c");
+	public function findAbuseContact(): ?string {
+		return $this->whois->getKeyValue("abuse-c");
 	}
 
 }
