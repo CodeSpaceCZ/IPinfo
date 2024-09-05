@@ -1,11 +1,11 @@
 {
-	"name": "codespace/whois-parser",
+	"name": "codespace/ip-info",
 	"type": "library",
-	"license": "MIT",
+	"license": "LGPLv3",
 	"autoload": {
 		"psr-4": {
-			"CodeSpace\\WhoisParser\\": "src/",
-			"CodeSpace\\WhoisParser\\Provider\\": "src/provider/"
+			"CodeSpace\\IpInfo\\": "src/",
+			"CodeSpace\\IpInfo\\Provider\\": "src/provider/"
 		}
 	},
 	"require": {

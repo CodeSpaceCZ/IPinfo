@@ -1,20 +1,15 @@
-<?php namespace CodeSpace\WhoisParser;
+<?php namespace CodeSpace\IpInfo;
 
 class WhoisList implements ProviderInterface {
 
-	private array $responses = [];
-
 	private array $providers = [];
 
-	public function __construct(?WhoisParser $response = null) {
-		$this->addResponse($response);
+	public function __construct(?ProviderInterface $provider = null) {
+		$this->addProvider($provider);
 	}
 
-	public function addResponse(?WhoisParser $response) {
-		if (!$response) return;
-		$provider = $response->getProvider();
+	public function addProvider(?ProviderInterface $provider) {
 		if (!$provider) return;
-		$this->responses[] = $response;
 		$this->providers[] = $provider;
 	}
 
@@ -52,6 +47,10 @@ class WhoisList implements ProviderInterface {
 
 	public function findAbuseContact(): ?string {
 		return $this->providerIter("findAbuseContact");
+	}
+
+	public function findRedirect(): ?string {
+		return $this->providerIter("findRedirect");
 	}
 
 }

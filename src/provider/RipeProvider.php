@@ -1,18 +1,15 @@
-<?php namespace CodeSpace\WhoisParser\Provider;
+<?php namespace CodeSpace\IpInfo\Provider;
 
-use CodeSpace\WhoisParser\ProviderInterface;
-use CodeSpace\WhoisParser\WhoisParser;
+use CodeSpace\IpInfo\WhoisParser;
 
-class RipeProvider implements ProviderInterface {
+class RipeProvider extends AbstractProvider {
 
-	private $whois;
-
-	public function __construct(WhoisParser $whois) {
-		$this->whois = $whois;
+	public function getAsnSection(): ?WhoisParser {
+		return $this->whois->getSectionWithKey("aut-num");
 	}
 
 	public function parseAsn(): ?array {
-		$as = $this->whois->getSectionWithKey("aut-num");
+		$as = $this->getAsnSection();
 		if (!$as) return null;
 		return [
 			"asn" => $as->getKeyValue("aut-num"),
@@ -21,11 +18,15 @@ class RipeProvider implements ProviderInterface {
 		];
 	}
 
+	public function getAbuseSection() {
+		return $this->whois->getSectionWithKey("abuse-mailbox");
+	}
+
 	public function parseAbuse(): ?array {
-		$abuse = $this->whois->getSectionWithKey("abuse-mailbox");
+		$abuse = $this->getAbuseSection();
 		if (!$abuse) return null;
 		return [
-			"role" => $abuse->getKeyValue("role"),
+			"name" => $abuse->getKeyValue("role"),
 			"address" => $abuse->getKeyValues("address"),
 			"phone" => $abuse->getKeyValue("phone"),
 			"fax" => $abuse->getKeyValue("fax-no"),
@@ -33,11 +34,14 @@ class RipeProvider implements ProviderInterface {
 		];
 	}
 
+	public function getOrgSection() {
+		return $this->whois->getSectionWithKey("organisation");
+	}
+
 	public function parseOrg(): ?array {
-		$org = $this->whois->getSectionWithKey("organisation");
+		$org = $this->getOrgSection();
 		if (!$org) return null;
 		return [
-			"id" => $org->getKeyValue("organisation"),
 			"name" => $org->getKeyValue("org-name"),
 			"address" => $org->getKeyValues("address"),
 			"phone" => $org->getKeyValue("phone"),
@@ -46,23 +50,29 @@ class RipeProvider implements ProviderInterface {
 		];
 	}
 
+	public function getRouteSection() {
+		return $this->whois->getSectionWithKeys(["route", "route6"]);
+	}
+
 	public function parseRoute(): ?array {
-		$section = $this->whois->getSectionWithKeys(["route", "route6"]);
+		$section = $this->getRouteSection();
 		if (!$section) return null;
-		$range = $section->getKeysValue(["route", "route6"]);
 		return [
-			"range" => $range,
+			"range" => $section->getKeysValue(["route", "route6"]),
 			"description" => $section->getKeyValue("descr"),
 			"asn" => $section->getKeyValue("origin")
 		];
 	}
 
+	public function getInetSection() {
+		return $this->whois->getSectionWithKeys(["inetnum", "inet6num"]);
+	}
+
 	public function parseInet(): ?array {
-		$section = $this->whois->getSectionWithKeys(["inetnum", "inet6num"]);
+		$section = $this->getInetSection();
 		if (!$section) return null;
-		$range = $section->getKeysValue(["inetnum", "inet6num"]);
 		return [
-			"range" => $range,
+			"range" => $section->getKeysValue(["inetnum", "inet6num"]),
 			"name" => $section->getKeyValue("netname"),
 			"description" => $section->getKeyValue("descr"),
 			"country" => $section->getKeyValue("country")

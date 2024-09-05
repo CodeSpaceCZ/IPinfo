@@ -1,3 +1,3 @@
-<?php namespace CodeSpace\WhoisParser\Provider;
+<?php namespace CodeSpace\IpInfo\Provider;
 
 class ApNicProvider extends RipeProvider {}

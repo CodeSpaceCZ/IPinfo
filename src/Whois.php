@@ -1,4 +1,4 @@
-<?php namespace CodeSpace\WhoisParser;
+<?php namespace CodeSpace\IpInfo;
 
 class Whois {
 
@@ -20,14 +20,14 @@ class Whois {
 		$asn = $list->findAsn();
 		if (!$asn) return;
 		$asn_whois = WhoisClient::query($asn);
-		$list->addResponse($asn_whois);
+		$list->addProvider($asn_whois);
 	}
 
 	private function addAbuse(WhoisList $list) {
 		$abuse_c = $list->findAbuseContact();
 		if (!$abuse_c) return;
 		$abuse_whois = WhoisClient::query($abuse_c);
-		$list->addResponse($abuse_whois);
+		$list->addProvider($abuse_whois);
 	}
 
 }

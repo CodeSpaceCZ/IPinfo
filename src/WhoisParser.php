@@ -1,30 +1,17 @@
-<?php namespace CodeSpace\WhoisParser;
-
-use CodeSpace\WhoisParser\Provider\ApNicProvider;
-use CodeSpace\WhoisParser\Provider\RipeProvider;
+<?php namespace CodeSpace\IpInfo;
 
 class WhoisParser {
 
 	public array $lines = [];
-	public ?Provider $provider;
 
-	public static function fromArray(array $lines, ?Provider $provider = null) {
+	public static function fromArray(array $lines) {
 		$parser = new self();
 		$parser->lines = $lines;
-		$parser->provider = $provider;
 		return $parser;
 	}
 
-	public static function fromString(string $whois, ?Provider $provider = null) {
-		return self::fromArray(explode("\n", $whois), $provider);
-	}
-
-	public function getProvider(): ?ProviderInterface {
-		if (!$this->provider) return null;
-		return match ($this->provider) {
-			Provider::RIPE => new RipeProvider($this),
-			Provider::APNIC => new ApNicProvider($this)
-		};
+	public static function fromString(string $whois) {
+		return self::fromArray(explode("\n", $whois));
 	}
 
 	private function getOffset(array $arr, int $index): mixed {
@@ -96,14 +83,14 @@ class WhoisParser {
 	}
 
 	function getSubset(int $start, int $end) {
-		return self::fromArray(array_slice($this->lines, $start, $end-$start), $this->provider);
+		return self::fromArray(array_slice($this->lines, $start, $end-$start));
 	}
 
 	function getSectionWithKey(string $key) {
 		return $this->getSectionWithKeys([$key]);
 	}
 
-	function getSectionWithKeys(array $keys): ?WhoisParser {
+	function getSectionWithKeys(array $keys): ?Self {
 		$line = $this->findFirstKey($keys);
 		if ($line == null) return null;
 		return $this->getSection($line);

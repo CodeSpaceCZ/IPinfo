@@ -1,26 +1,71 @@
-<?php namespace CodeSpace\WhoisParser;
+<?php namespace CodeSpace\IpInfo;
 
+use CodeSpace\IpInfo\Provider;
 use MallardDuck\Whois\Client;
 
 class WhoisClient {
 
-	public static function query(string $q): ?WhoisParser {
+	public static function query(string $q): ?ProviderInterface {
 		$server = self::getServer($q);
-		if (!$server) return null;
-		return self::queryServer("$q -B", $server);
+		$provider = null;
+		while ($server) {
+			$response = self::queryServer($q, $server);
+			$provider = self::getProvider($response, Provider::tryFrom($server));
+			$server = $provider->findRedirect();
+		}
+		return $provider;
 	}
 
-	public static function queryServer(string $q, string $server): WhoisParser {
+	private static function getProvider(WhoisParser $parser, Provider $provider) {
+		return match ($provider) {
+			Provider::RIPE => new Provider\RipeProvider($parser),
+			Provider::APNIC => new Provider\ApNicProvider($parser),
+			Provider::AFRINIC => new Provider\AfriNicProvider($parser),
+			Provider::LACNIC => new Provider\LacNicProvider($parser),
+			Provider::ARIN => new Provider\ArinProvider($parser)
+		};
+	}
+
+	private static function queryServer(string $q, string $server): WhoisParser {
 		$client = new Client($server);
 		$response = $client->makeRequest($q);
-		return WhoisParser::fromString($response, Provider::tryFrom($server));
+		return WhoisParser::fromString($response);
 	}
 
-	public static function getServer(string $q): ?string {
-		if (str_ends_with($q, "-RIPE")) return Provider::RIPE_WHOIS;
-		if (str_ends_with($q, "-AP")) return Provider::APNIC_WHOIS;
-		$res = self::queryServer($q, "whois.iana.org");
-		return $res->getKeysValue(["refer", "whois"]);
+	private static function getServer(string $q): ?string {
+		$server = self::getServerBySuffix($q);
+		if ($server) return $server;
+		if (self::isValidIpv4($q) || self::isValidIpv6($q) || self::isValidAsn($q)) {
+			$res = self::queryServer($q, "whois.iana.org");
+			return $res->getKeysValue(["refer", "whois"]);
+		}
+		return null;
+	}
+
+	private static function isValidIpv4(string $ip) {
+		return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
+	}
+
+	private static function isValidIpv6(string $ip) {
+		return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
+	}
+
+	private static function isValidAsn(string $asn) {
+		return preg_match('/^AS\d+$/i', $asn);
+	}
+
+	private static function getServerBySuffix(string $q) {
+		$suffixToProvider = [
+			'-RIPE' => Provider::RIPE_WHOIS,
+			'-AP' => Provider::APNIC_WHOIS,
+			'-ARIN' => Provider::ARIN_WHOIS,
+			'-LACNIC' => Provider::LACNIC_WHOIS,
+			'-AFRINIC' => Provider::AFRINIC_WHOIS,
+		];
+		foreach ($suffixToProvider as $suffix => $provider) {
+			if (str_ends_with($q, $suffix)) return $provider;
+		}
+		return null;
 	}
 
 }

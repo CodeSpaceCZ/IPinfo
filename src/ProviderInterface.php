@@ -1,4 +1,4 @@
-<?php namespace CodeSpace\WhoisParser;
+<?php namespace CodeSpace\IpInfo;
 
 interface ProviderInterface {
 
@@ -15,5 +15,7 @@ interface ProviderInterface {
 	public function findAsn(): ?string;
 
 	public function findAbuseContact(): ?string;
+
+	public function findRedirect(): ?string;
 
 }
