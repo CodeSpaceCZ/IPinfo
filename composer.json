@@ -1,7 +1,7 @@
 {
 	"name": "codespace/ip-info",
 	"type": "library",
-	"license": "LGPLv3",
+	"license": "LGPL-3.0-or-later",
 	"autoload": {
 		"psr-4": {
 			"CodeSpace\\IpInfo\\": "src/",
