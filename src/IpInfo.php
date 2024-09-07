@@ -1,8 +1,8 @@
 <?php namespace CodeSpace\IpInfo;
 
-class Whois {
+class IpInfo {
 
-	public function getIpAddress(string $ip): array {
+	public function getIpInfo(string $ip): array {
 		$whois = WhoisClient::query($ip);
 		$list = new WhoisList($whois);
 		$this->addAsn($list);
