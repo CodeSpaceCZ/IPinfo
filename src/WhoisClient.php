@@ -5,6 +5,8 @@ use MallardDuck\Whois\Client;
 
 class WhoisClient {
 
+	const B_FLAG_SERVERS = ["whois.ripe.net"];
+
 	public static function query(string $q): ?ProviderInterface {
 		$server = self::getServer($q);
 		$provider = null;
@@ -27,6 +29,7 @@ class WhoisClient {
 	}
 
 	private static function queryServer(string $q, string $server): WhoisParser {
+		if (in_array($server, self::B_FLAG_SERVERS)) $q = "$q -B";
 		$client = new Client($server);
 		$response = $client->makeRequest($q);
 		return WhoisParser::fromString($response);
