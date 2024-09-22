@@ -43,7 +43,7 @@ class ArinProvider extends AbstractProvider {
 		if (!$org) return null;
 		return [
 			"name" => $org->getKeyValue("OrgName"),
-			"address" => $org->getKeyValues("Address"),
+			"address" => $this->parseAddress($org),
 			"phone" => $org->getKeyValue("OrgPhone"),
 			"fax" => $org->getKeyValue("OrgFax"),
 			"email" => $org->getKeyValue("OrgEmail")
@@ -89,6 +89,15 @@ class ArinProvider extends AbstractProvider {
 
 	public function findRedirect(): ?string {
 		return $this->whois->getKeyValue("ResourceLink", 1);
+	}
+
+	private function parseAddress(WhoisParser $whois): ?array {
+		$arr = $whois->getKeyValues("Address");
+		if (!$arr) return null;
+		foreach (["City", "StateProv", "PostalCode", "Country"] as $key) {
+			if ($value = $whois->getKeyValue($key)) $arr[] = $value;
+		}
+		return $arr;
 	}
 
 }
