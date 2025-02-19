@@ -88,7 +88,14 @@ class ArinProvider extends AbstractProvider {
 	}
 
 	public function findRedirect(): ?string {
-		return $this->whois->getKeyValue("ResourceLink", 1);
+		$servers = $this->whois->getKeysValues(["ResourceLink", "ReferralServer"]);
+		$pattern = '/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/';
+		foreach ($servers as $server) {
+			if (preg_match($pattern, $server)) {
+				return $server;
+			}
+		}
+		return null;
 	}
 
 	private function parseAddress(WhoisParser $whois): ?array {
